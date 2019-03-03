@@ -104,6 +104,28 @@ class Game {
       this.historyIndex += 1
     }
   }
+
+  getHistory () {
+    let player = 1
+    let index = 0
+    const history = [{ index, name: 'Start of the game' }]
+
+    for (const item of this.history) {
+      index += 1
+      let name
+      if (item[0] === 'w') {
+        name = `P${player} placed a wall`
+      } else if (item[0] === 'w') {
+        name = `P${player} moved its pawn`
+      } else {
+        name = `P${player} ??`
+      }
+      history.unshift({ index, name })
+      player = player === 1 ? 2 : 1
+    }
+
+    return history
+  }
 }
 
 export default Game

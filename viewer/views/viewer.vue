@@ -3,7 +3,12 @@
     <div class="flex-extensible-fixed">
       <div class="board">
         <div v-for="(row, $rowIndex) in grid" :key="'row-' + $rowIndex" class="row">
-          <div v-for="(col, $colIndex) in row" :key="'col-' + $colIndex" :class="col">
+          <div
+            v-for="(col, $colIndex) in row"
+            :key="'col-' + $colIndex"
+            :class="col.classes"
+            @click.prevent="col.click"
+          >
             <div class="player" />
             <div class="cross-1" />
             <div class="cross-2" />
@@ -15,14 +20,14 @@
       <div class="flex-fixed">
         <div class="columns m-1 mt-2 p-1">
           <div class="column col-6">
-            <section class="player player-1 current">
+            <section class="player player-1" :class="{ current: currentPlayerID === 1 }">
               <h5>Player 1</h5>
               <small>Remaining walls: {{ game.player1.remainingWalls }}</small><br>
               <small>Evaluation score: {{ game.player1.score || 'N/A' }}</small>
             </section>
           </div>
           <div class="column col-6">
-            <section class="player player-2">
+            <section class="player player-2" :class="{ current: currentPlayerID === 2 }">
               <h5>Player 2</h5>
               <small>Remaining walls: {{ game.player2.remainingWalls }}</small><br>
               <small>Evaluation score: {{ game.player2.score || 'N/A' }}</small>
@@ -72,6 +77,9 @@ export default {
   },
 
   computed: {
+    currentPlayerID () {
+      return this.game.currentPlayerID
+    },
     history () {
       return [
         { uuid: '2019-03-19-11-21-43588-HH-kajvbzz', name: '🧑 vs 🧑' },
@@ -118,21 +126,28 @@ export default {
 
             if (x > 0) {
               if (this.game.player1.walls.includes(wallPosition) || this.game.player1.walls.includes(64 + wallPosition)) {
-                cols.push(['wall wall-point wall-player-1'])
+                cols.push({ classes: ['wall wall-point wall-player-1'], click: () => {} })
               } else if (this.game.player2.walls.includes(wallPosition) || this.game.player2.walls.includes(64 + wallPosition)) {
-                cols.push(['wall wall-point wall-player-2'])
+                cols.push({ classes: ['wall wall-point wall-player-2'], click: () => {} })
               } else {
-                cols.push(['wall wall-point'])
+                cols.push({ classes: ['wall wall-point'], click: () => {} })
               }
             }
 
+            const classes = ['wall wall-horizontal']
             if ((x > 0 && this.game.player1.walls.includes(wallPosition)) || (x < 8 && this.game.player1.walls.includes(wallPosition + 1))) {
-              cols.push(['wall wall-horizontal wall-player-1'])
+              classes.push('wall-player-1')
             } else if ((x > 0 && this.game.player2.walls.includes(wallPosition)) || (x < 8 && this.game.player2.walls.includes(wallPosition + 1))) {
-              cols.push(['wall wall-horizontal wall-player-2'])
-            } else {
-              cols.push(['wall wall-horizontal'])
+              classes.push('wall-player-2')
+            } else if (this.game.allowedMoves.walls.includes(wallPosition + 1)) {
+              classes.push('wall-place')
             }
+            const click = () => {
+              if (classes.includes('wall-place')) {
+                this.game.placeWall(wallPosition + 1)
+              }
+            }
+            cols.push({ classes, click })
           }
           rows.push(cols)
         }
@@ -142,13 +157,20 @@ export default {
           if (x > 0) {
             const wallPosition = y * 8 + x - 1
 
+            const classes = ['wall wall-vertical']
             if (this.game.player1.walls.includes(64 + wallPosition) || (y > 0 && this.game.player1.walls.includes(64 + wallPosition - 8))) {
-              cols.push(['wall wall-vertical wall-player-1'])
+              classes.push('wall-player-1')
             } else if (this.game.player2.walls.includes(64 + wallPosition) || (y > 0 && this.game.player2.walls.includes(64 + wallPosition - 8))) {
-              cols.push(['wall wall-vertical wall-player-2'])
-            } else {
-              cols.push(['wall wall-vertical'])
+              classes.push('wall-player-2')
+            } else if (this.game.allowedMoves.walls.includes(64 + wallPosition)) {
+              classes.push('wall-place')
             }
+            const click = () => {
+              if (classes.includes('wall-place')) {
+                this.game.placeWall(64 + wallPosition)
+              }
+            }
+            cols.push({ classes, click })
           }
 
           const classes = ['case']
@@ -165,7 +187,14 @@ export default {
           if (this.game.player2.bestPath.some(c => c.row === y && c.col === x)) {
             classes.push('path-player-2')
           }
-          cols.push(classes)
+          const click = ((caseY, caseX) => {
+            return () => {
+              if (classes.includes('case-move')) {
+                this.game.movePlayer({ row: caseY, col: caseX })
+              }
+            }
+          })(y, x)
+          cols.push({ classes, click })
         }
         rows.push(cols)
       }
@@ -233,12 +262,35 @@ export default {
     padding-top: 2%;
     width: 2%;
     float: left;
+    position: relative;
+
+    &.wall-place:hover::after {
+      content: '';
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: #CCC;
+      cursor: pointer;
+      z-index: 1;
+    }
   }
+
   .wall-horizontal {
     width: 9%;
+
+    &.wall-place:hover::after {
+      right: -122%;
+    }
   }
   .wall-vertical {
     padding-top: 9%;
+
+    &.wall-place:hover::after {
+      bottom: -122%;
+    }
   }
   .wall {
     background: #ecd8d8;

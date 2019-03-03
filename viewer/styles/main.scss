@@ -1,0 +1,69 @@
+@import "variables.scss";
+
+// Import full Spectre source code
+@import "node_modules/spectre.css/src/spectre";
+
+#app,
+body,
+html {
+  height: 100%;
+  margin: 0;
+  min-width: 320px;
+  padding: 0;
+}
+
+.menu.without-bg {
+  box-shadow: none;
+  background: transparent;
+}
+
+.flex-view,
+.flex-view-inline {
+  display: flex;
+  height: 100%;
+}
+.flex-view-inline {
+  display: inline-flex;
+}
+
+.flex-view-inline.flex-column,
+.flex-view.flex-column {
+  flex-direction: column;
+}
+
+.flex-view-inline.flex-column > .flex-extensible,
+.flex-view-inline.flex-column > .flex-fixed,
+.flex-view.flex-column > .flex-extensible,
+.flex-view.flex-column > .flex-fixed {
+  height: auto;
+  width: 100%;
+}
+
+.flex-view-inline > .flex-fixed,
+.flex-view > .flex-fixed {
+  flex: 0 0 auto;
+  height: 100%;
+}
+
+.flex-view-inline > .flex-extensible-fixed,
+.flex-view > .flex-extensible-fixed {
+  flex: 1 1 auto;
+}
+
+.flex-view-inline > .flex-extensible,
+.flex-view > .flex-extensible {
+  flex: 1 1 auto;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.scrollable {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.flex-center {
+  align-items: center;
+  display: flex;
+}

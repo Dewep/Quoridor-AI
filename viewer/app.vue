@@ -1,18 +1,57 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/viewer">Viewer</router-link>
-    </div>
-    <router-view/>
+  <div id="app" class="flex-view">
+    <nav id="nav" class="flex-fixed">
+      <div class="text-center mt-2">
+        <h3>Quoridor</h3>
+        <RouterLink to="/" class="btn btn-primary">
+          New game
+        </RouterLink>
+      </div>
+
+      <br>
+      <ul class="menu without-bg">
+        <li class="divider text-center" data-content="Last games" />
+        <li v-for="game in lastGames" :key="game.uuid + 2" class="menu-item">
+          <RouterLink :to="{ name: 'viewer', params: { uuid: game.uuid } }">
+            {{ game.name }}
+          </RouterLink>
+          <small class="menu-badge mr-2">
+            <mark>{{ game.date }}</mark>
+          </small>
+        </li>
+      </ul>
+    </nav>
+
+    <router-view class="flex-extensible-fixed" />
   </div>
 </template>
 
-<style lang="scss">
-// Define variables to override default ones
-$primary-color: #2e5bec;
-$dark-color: #3e396b;
+<script>
+export default {
+  name: 'home',
 
-// Import full Spectre source code
-@import "node_modules/spectre.css/src/spectre";
+  computed: {
+    lastGames () {
+      return [
+        { uuid: '2019-03-19-11-21-43588-HH-kajvbzz', name: '🧑 vs 🧑', date: '11:21' },
+        { uuid: '2019-03-19-11-20-43588-HR-kajvbzz', name: '🧑 vs 🤖', date: '11:20' },
+        { uuid: '2019-03-19-11-19-43588-RH-kajvbzz', name: '🤖 vs 🧑', date: '11:19' },
+        { uuid: '2019-03-19-11-18-43588-RR-kajvbzz', name: '🤖 vs 🤖', date: '11:18' },
+        { uuid: '2019-03-19-11-17-43588-RR-kajvbzz', name: '🤖 vs 🤖', date: '11:17' },
+        { uuid: '2019-03-19-11-16-43588-RR-kajvbzz', name: '🤖 vs 🤖', date: '11:16' },
+        { uuid: '2019-03-19-11-15-43588-RR-kajvbzz', name: '🤖 vs 🤖', date: '11:15' }
+      ]
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+@import "styles/main.scss";
+
+#nav {
+  width: 12rem;
+  background: $sidebar-color;
+
+}
 </style>

@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <div class="viewer">
+  <div class="flex-view viewer">
+    <div class="flex-extensible-fixed">
       <div class="board">
         <div v-for="(row, $rowIndex) in grid" :key="'row-' + $rowIndex" class="row">
           <div v-for="(col, $colIndex) in row" :key="'col-' + $colIndex" :class="col">
@@ -11,13 +11,50 @@
         </div>
       </div>
     </div>
-    <input v-model="index" type="number">
-    <button class="btn btn-primary" @click="placeWall">
-      Wall
-    </button>
-    <button class="btn btn-primary" @click="movePlayer">
-      Move
-    </button>
+    <div class="flex-fixed flex-view flex-column game-info">
+      <div class="flex-fixed">
+        <div class="columns m-1 mt-2 p-1">
+          <div class="column col-6">
+            <section class="player player-1 current">
+              <h5>Player 1</h5>
+              <small>Remaining walls: {{ game.player1.remainingWalls }}</small><br>
+              <small>Evaluation score: {{ game.player1.score || 'N/A' }}</small>
+            </section>
+          </div>
+          <div class="column col-6">
+            <section class="player player-2">
+              <h5>Player 2</h5>
+              <small>Remaining walls: {{ game.player2.remainingWalls }}</small><br>
+              <small>Evaluation score: {{ game.player2.score || 'N/A' }}</small>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex-extensible">
+        <h6>History</h6>
+        <!-- <div>
+          <input v-model="index" type="number">
+          <button class="btn btn-primary" @click="placeWall">
+            Wall
+          </button>
+          <button class="btn btn-primary" @click="movePlayer">
+            Move
+          </button>
+        </div> -->
+        <ul class="menu without-bg">
+          <li
+            v-for="(item, $index) in history"
+            :key="item.uuid + $index"
+            class="menu-item"
+          >
+            <a href="#">
+              {{ item.name }}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -35,6 +72,41 @@ export default {
   },
 
   computed: {
+    history () {
+      return [
+        { uuid: '2019-03-19-11-21-43588-HH-kajvbzz', name: '🧑 vs 🧑' },
+        { uuid: '2019-03-19-11-20-43588-HR-kajvbzz', name: '🧑 vs 🤖' },
+        { uuid: '2019-03-19-11-19-43588-RH-kajvbzz', name: '🤖 vs 🧑' },
+        { uuid: '2019-03-19-11-18-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-17-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-16-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-21-43588-HH-kajvbzz', name: '🧑 vs 🧑' },
+        { uuid: '2019-03-19-11-20-43588-HR-kajvbzz', name: '🧑 vs 🤖' },
+        { uuid: '2019-03-19-11-19-43588-RH-kajvbzz', name: '🤖 vs 🧑' },
+        { uuid: '2019-03-19-11-18-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-17-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-16-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-21-43588-HH-kajvbzz', name: '🧑 vs 🧑' },
+        { uuid: '2019-03-19-11-20-43588-HR-kajvbzz', name: '🧑 vs 🤖' },
+        { uuid: '2019-03-19-11-19-43588-RH-kajvbzz', name: '🤖 vs 🧑' },
+        { uuid: '2019-03-19-11-18-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-17-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-16-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-21-43588-HH-kajvbzz', name: '🧑 vs 🧑' },
+        { uuid: '2019-03-19-11-20-43588-HR-kajvbzz', name: '🧑 vs 🤖' },
+        { uuid: '2019-03-19-11-19-43588-RH-kajvbzz', name: '🤖 vs 🧑' },
+        { uuid: '2019-03-19-11-18-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-17-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-16-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-21-43588-HH-kajvbzz', name: '🧑 vs 🧑' },
+        { uuid: '2019-03-19-11-20-43588-HR-kajvbzz', name: '🧑 vs 🤖' },
+        { uuid: '2019-03-19-11-19-43588-RH-kajvbzz', name: '🤖 vs 🧑' },
+        { uuid: '2019-03-19-11-18-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-17-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-16-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-15-43588-RR-kajvbzz', name: '🤖 vs 🤖' }
+      ]
+    },
     grid () {
       const rows = []
 
@@ -116,28 +188,57 @@ export default {
 </script>
 
 <style lang="scss">
+@import "../styles/variables.scss";
+
+.viewer {
+  background: $board-color;
+}
+
+.game-info {
+  .player {
+    border-radius: .5rem;
+    border: .1rem solid $board-color;
+    opacity: .6;
+    padding: .5rem;
+    color: #FFF;
+    width: 9rem;
+    text-align: center;
+
+    &.player-1 {
+      background: $player-one-color;
+    }
+    &.player-2 {
+      background: $player-two-color;
+    }
+    &.current {
+      border-color: $primary-color;
+      opacity: 1;
+    }
+  }
+}
+
 .board {
-  background: #5f5353;
   padding: 20px 20px 60px;
+  max-width: 44rem;
 
   .row {
     clear: both;
   }
   .case {
-    height: 40px;
-    width: 40px;
+    padding-top: 9%;
+    width: 9%;
     float: left;
   }
   .wall {
-    height: 10px;
-    width: 10px;
+    padding-top: 2%;
+    width: 2%;
     float: left;
   }
   .wall-horizontal {
-    width: 40px;
+    width: 9%;
   }
   .wall-vertical {
-    height: 40px;
+    padding-top: 9%;
   }
   .wall {
     background: #ecd8d8;
@@ -176,12 +277,12 @@ export default {
   .wall-player-1,
   .player-1 .player,
   .path-player-1 .cross-1 {
-    background: red;
+    background: $player-one-color;
   }
   .wall-player-2,
   .player-2 .player,
   .path-player-2 .cross-2 {
-    background: green;
+    background: $player-two-color;
   }
   .case {
     background: #FFF;

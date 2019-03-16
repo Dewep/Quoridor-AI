@@ -1,4 +1,4 @@
-import Player from './player'
+const Player = require('./player')
 
 class Game {
   constructor (history = null) {
@@ -10,6 +10,9 @@ class Game {
     this.history = !history || !history.length ? [null] : history
     this.historyIndex = 0
 
+    this._temporaryWall = null
+    this._allowedMoves = null
+
     this.setHistory(this.history.length - 1)
   }
 
@@ -17,36 +20,79 @@ class Game {
     return id === 1 ? this.player1 : this.player2
   }
 
+  _isWallAt (position) {
+    return this.player1.walls.includes(position) || this.player2.walls.includes(position) || position === this._temporaryWall
+  }
+
+  _isMoveCrossingWall (rowFrom, colFrom, rowTo, colTo) {
+    const rowModification = rowTo - rowFrom
+    const colModification = colTo - colFrom
+    if (rowModification === -1 || rowModification === 1) {
+      const wallPosition = (rowFrom + (rowModification === -1 ? -1 : 0)) * 8 + colFrom - 1
+      if (colFrom > 0 && this._isWallAt(wallPosition)) {
+        return true
+      }
+      if (colFrom < 8 && this._isWallAt(wallPosition + 1)) {
+        return true
+      }
+    }
+    if (colModification === -1 || colModification === 1) {
+      const wallPosition = 64 + (rowFrom - 1) * 8 + colFrom + (colModification === -1 ? -1 : 0)
+      if (rowFrom > 0 && this._isWallAt(wallPosition)) {
+        return true
+      }
+      if (rowFrom < 8 && this._isWallAt(wallPosition + 8)) {
+        return true
+      }
+    }
+    if (colModification === 1 || colModification === -1) {
+    }
+    return false
+  }
+
   get currentPlayer () {
     return this.getPlayer(this.currentPlayerID)
   }
 
   get allowedMoves () {
-    const cases = [
-      { row: this.currentPlayer.row - 1, col: this.currentPlayer.col },
-      { row: this.currentPlayer.row + 1, col: this.currentPlayer.col },
-      { row: this.currentPlayer.row, col: this.currentPlayer.col - 1 },
-      { row: this.currentPlayer.row, col: this.currentPlayer.col + 1 }
-    ].filter(c => {
-      if (c.row < 0 || c.row > 8 || c.col < 0 || c.col > 8) {
-        return false
-      }
-      // TODO: Can't cross walls
-      return true
-    })
-    const walls = !this.currentPlayer.remainingWalls ? [] : Array.from(Array(128).keys()).filter(w => {
-      if (this.player1.walls.includes(w) || this.player2.walls.includes(w)) {
-        return false
-      }
-      // TODO: Can't place walls where emplacements are used by other walls
-      // TODO: Can't cross other walls
-      // TODO: Can't block player to win
-      return true
-    })
-    return {
-      cases,
-      walls
+    if (!this._allowedMoves) {
+      const cases = [
+        { row: this.currentPlayer.row - 1, col: this.currentPlayer.col },
+        { row: this.currentPlayer.row + 1, col: this.currentPlayer.col },
+        { row: this.currentPlayer.row, col: this.currentPlayer.col - 1 },
+        { row: this.currentPlayer.row, col: this.currentPlayer.col + 1 }
+      ].filter(c => {
+        if (c.row < 0 || c.row > 8 || c.col < 0 || c.col > 8) {
+          return false
+        }
+        // Can't cross walls
+        if (this._isMoveCrossingWall(this.currentPlayer.row, this.currentPlayer.col, c.row, c.col)) {
+          return false
+        }
+        return true
+      })
+      const walls = !this.currentPlayer.remainingWalls ? [] : Array.from(Array(128).keys()).filter(w => {
+        // Wall already placed at this position
+        if (this._isWallAt(w)) {
+          return false
+        }
+        // Can't cross other walls
+        if (this._isWallAt(w + 64) || this._isWallAt(w - 64) || (w < 63 && this._isWallAt(w + 1)) || (w > 63 && this._isWallAt(w + 8))) {
+          return false
+        }
+        // Can't block player to win
+        this._temporaryWall = w
+        if (!this.player1.isPossibleToWin(this._temporaryWall) || !this.player2.isPossibleToWin(this._temporaryWall)) {
+          this._temporaryWall = null
+          return false
+        }
+        this._temporaryWall = null
+
+        return true
+      })
+      this._allowedMoves = { cases, walls }
     }
+    return this._allowedMoves
   }
 
   getState (playerID = 1) {
@@ -87,7 +133,12 @@ class Game {
       this.history.push(action)
       this.historyIndex += 1
     }
+
+    this.player1.refreshBestPath()
+    this.player2.refreshBestPath()
+
     this.currentPlayerID = this.currentPlayerID === 1 ? 2 : 1
+    this._allowedMoves = null
   }
 
   reset () {
@@ -134,4 +185,4 @@ class Game {
   }
 }
 
-export default Game
+module.exports = Game

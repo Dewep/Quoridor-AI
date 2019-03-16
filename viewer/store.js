@@ -1,16 +1,19 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
+const moduleAuth = require('./modules/auth')
+const moduleGames = require('./modules/games')
+const pluginWs = require('./plugins/ws')
+
 Vue.use(Vuex)
 
-export default new Vuex.Store({
-  state: {
-
+module.exports = new Vuex.Store({
+  modules: {
+    auth: moduleAuth,
+    games: moduleGames
   },
-  mutations: {
-
-  },
-  actions: {
-
-  }
+  plugins: [
+    pluginWs
+  ],
+  strict: true
 })

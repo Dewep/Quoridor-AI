@@ -66,9 +66,9 @@
 </template>
 
 <script>
-import Game from '@/game'
+const Game = require('@/game')
 
-export default {
+module.exports = {
   name: 'viewer',
 
   data () {

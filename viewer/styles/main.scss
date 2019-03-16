@@ -10,6 +10,7 @@ html {
   margin: 0;
   min-width: 320px;
   padding: 0;
+  background: $board-color;
 }
 
 .menu.without-bg {
@@ -66,4 +67,12 @@ html {
 .flex-center {
   align-items: center;
   display: flex;
+}
+
+.loading.loading-opacity {
+  color: inherit !important;
+
+  & > * {
+    opacity: .3;
+  }
 }

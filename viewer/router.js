@@ -6,7 +6,7 @@ import Viewer from './views/viewer.vue'
 
 Vue.use(Router)
 
-export default new Router({
+module.exports = new Router({
   mode: 'history',
   base: process.env.BASE_URL,
   linkActiveClass: 'active',

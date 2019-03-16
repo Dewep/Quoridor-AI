@@ -23,6 +23,7 @@
             <section class="player player-1" :class="{ current: currentPlayerID === 1 }">
               <h5>Player 1</h5>
               <small>Remaining walls: {{ game.player1.remainingWalls }}</small><br>
+              <small>Cases to the victory: {{ game.player1.bestPath ? game.player1.bestPath.length : 'N/A' }}</small><br>
               <small>Evaluation score: {{ game.player1.score || 'N/A' }}</small>
             </section>
           </div>
@@ -30,6 +31,7 @@
             <section class="player player-2" :class="{ current: currentPlayerID === 2 }">
               <h5>Player 2</h5>
               <small>Remaining walls: {{ game.player2.remainingWalls }}</small><br>
+              <small>Cases to the victory: {{ game.player2.bestPath ? game.player2.bestPath.length : 'N/A' }}</small><br>
               <small>Evaluation score: {{ game.player2.score || 'N/A' }}</small>
             </section>
           </div>
@@ -139,7 +141,7 @@ export default {
               classes.push('wall-player-1')
             } else if ((x > 0 && this.game.player2.walls.includes(wallPosition)) || (x < 8 && this.game.player2.walls.includes(wallPosition + 1))) {
               classes.push('wall-player-2')
-            } else if (this.game.allowedMoves.walls.includes(wallPosition + 1)) {
+            } else if (x < 8 && this.game.allowedMoves.walls.includes(wallPosition + 1)) {
               classes.push('wall-place')
             }
             const click = () => {
@@ -316,15 +318,19 @@ export default {
     right: 1px;
     position: absolute;
     border-radius: 50%;
-    opacity: .25;
+    opacity: .2;
   }
   .cross-1 {
-    right: 25px;
-    bottom: 25px;
+    top: 40%;
+    left: 40%;
+    bottom: 40%;
+    right: 40%;
   }
   .cross-2 {
-    top: 25px;
-    left: 25px;
+    top: 40%;
+    left: 40%;
+    bottom: 40%;
+    right: 40%;
   }
   .wall-player-1,
   .player-1 .player,
@@ -356,19 +362,19 @@ export default {
       display: block;
     }
   }
-  .path-player-1.player-1,
-  .path-player-1.player-2,
-  .path-player-2.player-1,
-  .path-player-2.player-2 {
-    .cross-1 {
-      right: 30px;
-      bottom: 30px;
-    }
-    .cross-2 {
-      top: 30px;
-      left: 30px;
-    }
-  }
+  // .path-player-1.player-1,
+  // .path-player-1.player-2,
+  // .path-player-2.player-1,
+  // .path-player-2.player-2 {
+  //   .cross-1 {
+  //     right: 75%;
+  //     bottom: 75%;
+  //   }
+  //   .cross-2 {
+  //     top: 75%;
+  //     left: 75%;
+  //   }
+  // }
   .case-move:hover {
     background: #CCC;
     cursor: pointer;

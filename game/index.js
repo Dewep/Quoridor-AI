@@ -5,6 +5,8 @@ class Game {
     this.player1 = new Player(this, 1)
     this.player2 = new Player(this, 2)
 
+    // history = 'p67,p13,p58,p22,p49,w36,p48,w34,w96,w24,w26,w89,p49,w108,w60,w123,w62,w43,w127,w114,w55,w57,w84,w13,w28,p13'
+    // history = [null, ...history.split(',')]
     this.history = !history || !history.length ? [null] : history
     this.historyIndex = 0
 
@@ -65,7 +67,7 @@ class Game {
     return null
   }
 
-  _executeAction (action) {
+  _executeAction (action, addHistory = true) {
     if (!action || action.length < 2) {
       return
     }
@@ -81,6 +83,10 @@ class Game {
       this.currentPlayer.col = index % 9
     }
 
+    if (addHistory) {
+      this.history.push(action)
+      this.historyIndex += 1
+    }
     this.currentPlayerID = this.currentPlayerID === 1 ? 2 : 1
   }
 
@@ -98,7 +104,7 @@ class Game {
       const action = this.history[this.historyIndex]
 
       if (action) {
-        this._executeAction(action)
+        this._executeAction(action, false)
       }
 
       this.historyIndex += 1

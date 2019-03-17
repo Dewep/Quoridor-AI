@@ -6,11 +6,19 @@ class GameServer extends Game {
 
     this.slug = slug
     this.date = date
+    this.watch = []
 
     this.player1.auth = player1.auth
     this.player1.name = player1.name
     this.player2.auth = player2.auth
     this.player2.name = player2.name
+
+    if (player1.auth) {
+      this.watch.push(player1.auth)
+    }
+    if (player2.auth) {
+      this.watch.push(player2.auth)
+    }
   }
 
   summary () {

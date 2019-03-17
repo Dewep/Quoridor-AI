@@ -32,7 +32,8 @@ class Manager {
     } else if (type === 'human-bot') {
       this.newGame({ auth, name: '🧑' }, { auth: null, name: '🤖' })
     } else if (type === 'bot-bot') {
-      this.newGame({ auth: null, name: '🤖' }, { auth: null, name: '🤖' })
+      const slug = this.newGame({ auth: null, name: '🤖' }, { auth: null, name: '🤖' })
+      this.watchGame(slug, auth)
     }
   }
 
@@ -52,6 +53,51 @@ class Manager {
     this.currentGames.unshift(game)
 
     this.updateGamesList()
+
+    if (player1.auth) {
+      this.watchGame(slug, player1.auth)
+    }
+    if (player2.auth) {
+      this.watchGame(slug, player2.auth)
+    }
+
+    return slug
+  }
+
+  watchGame (gameSlug, auth, sendEvent = true) {
+    const game = this.currentGames.find(g => g.slug === gameSlug)
+
+    if (!game) {
+      return
+    }
+
+    if (sendEvent) {
+      this.send({ auth }, 'watch-game', { gameSlug })
+    }
+
+    game.watch = [...game.watch.filter(a => a !== auth), auth]
+
+    this.sendGameStatus(gameSlug, auth)
+  }
+
+  sendGameStatus (gameSlug, auth = null) {
+    const game = this.currentGames.find(g => g.slug === gameSlug)
+
+    if (!game) {
+      return
+    }
+
+    const state = game.getState()
+    for (const watchAuth of game.watch) {
+      if (!auth || auth === watchAuth) {
+        this.send({ auth: [watchAuth] }, 'game-state', { gameSlug, state })
+
+        if (game.currentPlayer.auth === watchAuth) {
+          const data = { gameSlug, currentPlayerID: game.currentPlayerID, allowedMoves: game.allowedMoves }
+          this.send({ auth: [watchAuth] }, 'game-actions', data)
+        }
+      }
+    }
   }
 
   updateGamesList (onlyForThisClient = null) {

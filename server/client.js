@@ -29,6 +29,7 @@ class Client {
           this.auth = data.auth
           this.send('auth', { auth: data.auth })
           this.manager.addClient(this)
+          return
         } else {
           throw new Error('Auth required')
         }

@@ -1,3 +1,5 @@
+const router = require('../router')
+
 module.exports = store => {
   // called when the store is initialized
 
@@ -5,8 +7,8 @@ module.exports = store => {
   let authToken = window.localStorage.authToken || null
 
   function eventHandler (type, data) {
-    if (type === 'toto') {
-      // ...
+    if (type === 'watch-game') {
+      router.push({ name: 'game', params: { gameSlug: data.gameSlug } })
     } else {
       store.commit('WS_EVENT', { type, data })
     }

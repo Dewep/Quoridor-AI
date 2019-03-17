@@ -1,5 +1,5 @@
 <template>
-  <div class="flex-view viewer">
+  <div class="flex-view game">
     <div class="flex-extensible-fixed">
       <div class="board">
         <div v-for="(row, $rowIndex) in grid" :key="'row-' + $rowIndex" class="row">
@@ -69,7 +69,7 @@
 const Game = require('@/game')
 
 module.exports = {
-  name: 'viewer',
+  name: 'game',
 
   data () {
     return {
@@ -221,7 +221,7 @@ module.exports = {
 <style lang="scss">
 @import "../styles/variables.scss";
 
-.viewer {
+.game {
   background: $board-color;
 }
 

@@ -22,7 +22,7 @@
         <ul class="menu without-bg">
           <li class="divider text-center" data-content="Current games" />
           <li v-for="game in currentGames" :key="game.slug + 2" class="menu-item">
-            <RouterLink :to="{ name: 'viewer', params: { slug: game.slug } }">
+            <RouterLink :to="{ name: 'game', params: { gameSlug: game.slug } }">
               {{ game.player1 }} vs {{ game.player2 }}
             </RouterLink>
             <small class="menu-badge mr-2">
@@ -35,7 +35,7 @@
         <ul class="menu without-bg">
           <li class="divider text-center" data-content="Last games" />
           <li v-for="game in lastGames" :key="game.slug + 2" class="menu-item">
-            <RouterLink :to="{ name: 'viewer', params: { slug: game.slug } }">
+            <RouterLink :to="{ name: 'game', params: { gameSlug: game.slug } }">
               {{ game.player1 }} vs {{ game.player2 }}
             </RouterLink>
             <small class="menu-badge mr-2">

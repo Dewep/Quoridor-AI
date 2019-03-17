@@ -10,7 +10,7 @@ module.exports = {
       }
     },
     entry: {
-      app: './viewer/main.js'
+      app: './client/main.js'
     }
   }
 }

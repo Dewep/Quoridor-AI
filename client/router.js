@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 
 import Home from './views/home.vue'
-import Viewer from './views/viewer.vue'
+import Game from './views/game.vue'
 
 Vue.use(Router)
 
@@ -17,13 +17,13 @@ module.exports = new Router({
       component: Home
     },
     {
-      path: '/viewer/:slug',
-      name: 'viewer',
-      component: Viewer
+      path: '/game/:gameSlug',
+      name: 'game',
+      component: Game
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      // component: () => import(/* webpackChunkName: "viewer" */ './views/viewer.vue')
+      // component: () => import(/* webpackChunkName: "game" */ './views/game.vue')
     }
   ]
 })

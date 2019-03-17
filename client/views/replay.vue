@@ -1,28 +1,25 @@
 <template>
   <div class="flex-view game">
-    <template v-if="!game">
-      Loading...
-    </template>
-    <template v-else>
-      <div class="flex-extensible-fixed">
-        <div class="board">
-          <div v-for="(row, $rowIndex) in grid" :key="'row-' + $rowIndex" class="row">
-            <div
-              v-for="(col, $colIndex) in row"
-              :key="'col-' + $colIndex"
-              :class="col.classes"
-              @click.prevent="col.click"
-            >
-              <div class="player" />
-              <div class="cross-1" />
-              <div class="cross-2" />
-            </div>
+    <div class="flex-extensible-fixed">
+      <div class="board">
+        <div v-for="(row, $rowIndex) in grid" :key="'row-' + $rowIndex" class="row">
+          <div
+            v-for="(col, $colIndex) in row"
+            :key="'col-' + $colIndex"
+            :class="col.classes"
+            @click.prevent="col.click"
+          >
+            <div class="player" />
+            <div class="cross-1" />
+            <div class="cross-2" />
           </div>
         </div>
       </div>
-      <div class="flex-fixed flex-view flex-column game-info">
-        <div class="flex-fixed">
-          <div class="m-1 mt-2 p-1">
+    </div>
+    <div class="flex-fixed flex-view flex-column game-info">
+      <div class="flex-fixed">
+        <div class="columns m-1 mt-2 p-1">
+          <div class="column col-6">
             <section class="player player-1" :class="{ current: currentPlayerID === 1 }">
               <h5>Player 1</h5>
               <small>Remaining walls: {{ game.player1.remainingWalls }}</small><br>
@@ -30,7 +27,7 @@
               <small>Evaluation score: {{ game.player1.score || 'N/A' }}</small>
             </section>
           </div>
-          <div class="m-1 mt-2 p-1">
+          <div class="column col-6">
             <section class="player player-2" :class="{ current: currentPlayerID === 2 }">
               <h5>Player 2</h5>
               <small>Remaining walls: {{ game.player2.remainingWalls }}</small><br>
@@ -40,39 +37,85 @@
           </div>
         </div>
       </div>
-    </template>
+
+      <div class="flex-extensible">
+        <h6>History</h6>
+        <!-- <div>
+          <input v-model="index" type="number">
+          <button class="btn btn-primary" @click="placeWall">
+            Wall
+          </button>
+          <button class="btn btn-primary" @click="movePlayer">
+            Move
+          </button>
+        </div> -->
+        <ul class="menu without-bg">
+          <li
+            v-for="(item, $index) in history"
+            :key="item.uuid + $index"
+            class="menu-item"
+          >
+            <a href="#">
+              {{ item.name }}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-const { mapGetters, mapActions } = require('vuex')
-// const Game = require('@/game')
+const Game = require('@/game')
 
 module.exports = {
   name: 'game',
 
-  props: {
-    gameSlug: {
-      type: String,
-      required: true
-    }
-  },
-
   data () {
     return {
-      index: ''
+      index: '',
+      game: new Game()
     }
   },
 
   computed: {
-    ...mapGetters([
-      'getGameInstance'
-    ]),
-    game () {
-      return this.getGameInstance(this.gameSlug)
-    },
     currentPlayerID () {
       return this.game.currentPlayerID
+    },
+    history () {
+      return [
+        { uuid: '2019-03-19-11-21-43588-HH-kajvbzz', name: '🧑 vs 🧑' },
+        { uuid: '2019-03-19-11-20-43588-HR-kajvbzz', name: '🧑 vs 🤖' },
+        { uuid: '2019-03-19-11-19-43588-RH-kajvbzz', name: '🤖 vs 🧑' },
+        { uuid: '2019-03-19-11-18-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-17-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-16-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-21-43588-HH-kajvbzz', name: '🧑 vs 🧑' },
+        { uuid: '2019-03-19-11-20-43588-HR-kajvbzz', name: '🧑 vs 🤖' },
+        { uuid: '2019-03-19-11-19-43588-RH-kajvbzz', name: '🤖 vs 🧑' },
+        { uuid: '2019-03-19-11-18-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-17-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-16-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-21-43588-HH-kajvbzz', name: '🧑 vs 🧑' },
+        { uuid: '2019-03-19-11-20-43588-HR-kajvbzz', name: '🧑 vs 🤖' },
+        { uuid: '2019-03-19-11-19-43588-RH-kajvbzz', name: '🤖 vs 🧑' },
+        { uuid: '2019-03-19-11-18-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-17-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-16-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-21-43588-HH-kajvbzz', name: '🧑 vs 🧑' },
+        { uuid: '2019-03-19-11-20-43588-HR-kajvbzz', name: '🧑 vs 🤖' },
+        { uuid: '2019-03-19-11-19-43588-RH-kajvbzz', name: '🤖 vs 🧑' },
+        { uuid: '2019-03-19-11-18-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-17-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-16-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-21-43588-HH-kajvbzz', name: '🧑 vs 🧑' },
+        { uuid: '2019-03-19-11-20-43588-HR-kajvbzz', name: '🧑 vs 🤖' },
+        { uuid: '2019-03-19-11-19-43588-RH-kajvbzz', name: '🤖 vs 🧑' },
+        { uuid: '2019-03-19-11-18-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-17-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-16-43588-RR-kajvbzz', name: '🤖 vs 🤖' },
+        { uuid: '2019-03-19-11-15-43588-RR-kajvbzz', name: '🤖 vs 🤖' }
+      ]
     },
     grid () {
       const rows = []
@@ -103,8 +146,7 @@ module.exports = {
             }
             const click = () => {
               if (classes.includes('wall-place')) {
-                // this.game.placeWall(wallPosition + 1)
-                this.actionGame({ gameSlug: this.gameSlug, action: 'w' + (wallPosition + 1) })
+                this.game.placeWall(wallPosition + 1)
               }
             }
             cols.push({ classes, click })
@@ -127,7 +169,7 @@ module.exports = {
             }
             const click = () => {
               if (classes.includes('wall-place')) {
-                this.actionGame({ gameSlug: this.gameSlug, action: 'w' + (64 + wallPosition) })
+                this.game.placeWall(64 + wallPosition)
               }
             }
             cols.push({ classes, click })
@@ -150,8 +192,7 @@ module.exports = {
           const click = ((caseY, caseX) => {
             return () => {
               if (classes.includes('case-move')) {
-                // this.actionGame({ row: caseY, col: caseX })
-                this.actionGame({ gameSlug: this.gameSlug, action: 'p' + (caseY * 9 + caseX) })
+                this.game.movePlayer({ row: caseY, col: caseX })
               }
             }
           })(y, x)
@@ -164,22 +205,15 @@ module.exports = {
     }
   },
 
-  watch: {
-    game: {
-      handler () {
-        if (!this.game) {
-          this.watchGame({ gameSlug: this.gameSlug })
-        }
-      },
-      immediate: true
-    }
-  },
-
   methods: {
-    ...mapActions([
-      'watchGame',
-      'actionGame'
-    ])
+    placeWall () {
+      this.game.placeWall(+this.index)
+      this.index = ''
+    },
+    movePlayer () {
+      this.game.movePlayer({ index: +this.index })
+      this.index = ''
+    }
   }
 }
 </script>

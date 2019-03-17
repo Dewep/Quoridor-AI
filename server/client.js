@@ -37,6 +37,10 @@ class Client {
 
       if (type === 'new-game') {
         this.manager.newGameRequest(data.type, this.auth)
+      } else if (type === 'watch-game') {
+        this.manager.watchGame(data.gameSlug, this.auth, false)
+      } else if (type === 'action-game') {
+        this.manager.actionGame(data.gameSlug, this.auth, data.action)
       } else {
         console.info('Client.onMessage unknown type =', type)
       }

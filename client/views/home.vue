@@ -76,7 +76,7 @@ module.exports = {
       }, 1000)
       setTimeout(() => {
         this.newGame({ type })
-      }, 3000)
+      }, 1500)
     }
   }
 }

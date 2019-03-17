@@ -50,6 +50,7 @@ class Manager {
     const slug = slugPrefix + '-' + slugMain
 
     const game = new GameServer(slug, player1, player2, now.format('HH:mm'))
+    game.reset()
     this.currentGames.unshift(game)
 
     this.updateGamesList()
@@ -64,6 +65,23 @@ class Manager {
     return slug
   }
 
+  actionGame (gameSlug, auth, action) {
+    const game = this.currentGames.find(g => g.slug === gameSlug)
+
+    if (!game) {
+      return
+    }
+
+    if (game.currentPlayer.auth !== auth) {
+      return
+    }
+
+    // TODO: check if action is allowed
+    game._executeAction(action)
+
+    this.sendGameStatus(gameSlug)
+  }
+
   watchGame (gameSlug, auth, sendEvent = true) {
     const game = this.currentGames.find(g => g.slug === gameSlug)
 
@@ -72,7 +90,7 @@ class Manager {
     }
 
     if (sendEvent) {
-      this.send({ auth }, 'watch-game', { gameSlug })
+      this.send({ auth }, 'game-watch', { gameSlug })
     }
 
     game.watch = [...game.watch.filter(a => a !== auth), auth]
@@ -90,12 +108,11 @@ class Manager {
     const state = game.getState()
     for (const watchAuth of game.watch) {
       if (!auth || auth === watchAuth) {
-        this.send({ auth: [watchAuth] }, 'game-state', { gameSlug, state })
-
-        if (game.currentPlayer.auth === watchAuth) {
-          const data = { gameSlug, currentPlayerID: game.currentPlayerID, allowedMoves: game.allowedMoves }
-          this.send({ auth: [watchAuth] }, 'game-actions', data)
+        const data = { gameSlug, state: { ...state } }
+        if (game.currentPlayer.auth !== watchAuth) {
+          data.allowedMoves = null
         }
+        this.send({ auth: [watchAuth] }, 'game-state', data)
       }
     }
   }

@@ -5,7 +5,7 @@
     </template>
     <template v-else>
       <div class="flex-extensible-fixed">
-        <div class="board">
+        <div :class="{ end: winner }" class="board">
           <div v-for="(row, $rowIndex) in grid" :key="'row-' + $rowIndex" class="row">
             <div
               v-for="(col, $colIndex) in row"
@@ -18,12 +18,23 @@
               <div class="cross-2" />
             </div>
           </div>
+          <div class="winner-info">
+            Player {{ winner }} won the game!
+          </div>
+          <div class="general-info">
+            <template v-if="game.allowedMoves">
+              You (player {{ currentPlayerID }}) have to play!
+            </template>
+            <template v-else>
+              This is the turn of your opponent.
+            </template>
+          </div>
         </div>
       </div>
-      <div class="flex-fixed flex-view flex-column game-info">
+      <div :class="{ end: winner }" class="flex-fixed flex-view flex-column game-info">
         <div class="flex-fixed">
           <div class="m-1 mt-2 p-1">
-            <section class="player player-1" :class="{ current: currentPlayerID === 1 }">
+            <section class="player player-1" :class="{ current: currentPlayerID === 1, winner: winner === 1 }">
               <h5>Player 1</h5>
               <small>Remaining walls: {{ game.player1.remainingWalls }}</small><br>
               <small>Cases to the victory: {{ game.player1.bestPath ? game.player1.bestPath.length : 'N/A' }}</small><br>
@@ -31,7 +42,7 @@
             </section>
           </div>
           <div class="m-1 mt-2 p-1">
-            <section class="player player-2" :class="{ current: currentPlayerID === 2 }">
+            <section class="player player-2" :class="{ current: currentPlayerID === 2, winner: winner === 2 }">
               <h5>Player 2</h5>
               <small>Remaining walls: {{ game.player2.remainingWalls }}</small><br>
               <small>Cases to the victory: {{ game.player2.bestPath ? game.player2.bestPath.length : 'N/A' }}</small><br>
@@ -74,6 +85,12 @@ module.exports = {
     currentPlayerID () {
       return this.game.currentPlayerID
     },
+    winner () {
+      if (!this.game.isEnd) {
+        return null
+      }
+      return this.game.player1.bestPath.length ? 2 : 1
+    },
     grid () {
       const rows = []
 
@@ -98,7 +115,7 @@ module.exports = {
               classes.push('wall-player-1')
             } else if ((x > 0 && this.game.player2.walls.includes(wallPosition)) || (x < 8 && this.game.player2.walls.includes(wallPosition + 1))) {
               classes.push('wall-player-2')
-            } else if (x < 8 && this.game.allowedMoves.walls.includes(wallPosition + 1)) {
+            } else if (this.game.allowedMoves && x < 8 && this.game.allowedMoves.walls.includes(wallPosition + 1)) {
               classes.push('wall-place')
             }
             const click = () => {
@@ -122,7 +139,7 @@ module.exports = {
               classes.push('wall-player-1')
             } else if (this.game.player2.walls.includes(64 + wallPosition) || (y > 0 && this.game.player2.walls.includes(64 + wallPosition - 8))) {
               classes.push('wall-player-2')
-            } else if (this.game.allowedMoves.walls.includes(64 + wallPosition)) {
+            } else if (this.game.allowedMoves && this.game.allowedMoves.walls.includes(64 + wallPosition)) {
               classes.push('wall-place')
             }
             const click = () => {
@@ -138,7 +155,7 @@ module.exports = {
             classes.push('player-1')
           } else if (this.game.player2.row === y && this.game.player2.col === x) {
             classes.push('player-2')
-          } else if (this.game.allowedMoves.cases.some(c => c.row === y && c.col === x)) {
+          } else if (this.game.allowedMoves && this.game.allowedMoves.cases.some(c => c.row === y && c.col === x)) {
             classes.push('case-move')
           }
           if (this.game.player1.bestPath.some(c => c.row === y && c.col === x)) {
@@ -200,6 +217,7 @@ module.exports = {
     color: #FFF;
     width: 9rem;
     text-align: center;
+    position: relative;
 
     &.player-1 {
       background: $player-one-color;
@@ -212,11 +230,88 @@ module.exports = {
       opacity: 1;
     }
   }
+
+  &.end {
+    .player {
+      opacity: .5;
+    }
+    .player::after,
+    .player::before {
+      position: absolute;
+      content: '';
+      display: block;
+      background: black;
+      width: 90%;
+      height: 10%;
+      top: 45%;
+      transform: rotate(-34deg);
+      left: 5%;
+      opacity: .8;
+    }
+    .player::before {
+      transform: rotate(34deg);
+    }
+
+    .player.winner {
+      opacity: 1;
+    }
+    .player.winner::after {
+      background: $sidebar-color;
+      content: 'Winner';
+      transform: none;
+      top: 2%;
+      right: 2%;
+      width: auto;
+      left: auto;
+      padding: .05rem .3rem;
+      height: auto;
+      opacity: 1;
+      color: $dark-color;
+      border-radius: .2rem;
+      font-size: .5rem;
+    }
+    .player.winner::before {
+      display: none;
+    }
+  }
 }
 
 .board {
-  padding: 20px 20px 60px;
+  padding: 20px;
   max-width: 44rem;
+  position: relative;
+
+  &::after {
+    content: '';
+    display: block;
+    clear: both;
+  }
+
+  .general-info,
+  .winner-info {
+    position: absolute;
+    background: white;
+    bottom: 1%;
+    left: 20%;
+    right: 20%;
+    text-align: center;
+    border-radius: .2rem;
+    font-weight: bold;
+    border: 1px solid $sidebar-color;
+    opacity: .95;
+  }
+  .winner-info {
+    display: none;
+    background: $sidebar-color;
+  }
+  &.end {
+    .general-info {
+      display: none;
+    }
+    .winner-info {
+      display: block;
+    }
+  }
 
   .row {
     clear: both;

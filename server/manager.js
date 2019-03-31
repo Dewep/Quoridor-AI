@@ -8,7 +8,12 @@ class Manager {
 
     this.currentGames = []
     this.lastGames = []
+    this.loadedGames = []
     this._waitingRequestAuth = null
+  }
+
+  _getGame (gameSlug) {
+    return this.loadedGames.find(g => g.slug === gameSlug) || null
   }
 
   addClient (client) {
@@ -51,7 +56,8 @@ class Manager {
 
     const game = new GameServer(slug, player1, player2, now.format('HH:mm'))
     game.reset()
-    this.currentGames.unshift(game)
+    this.loadedGames.unshift(game)
+    this.currentGames.unshift(slug)
 
     this.updateGamesList()
 
@@ -66,7 +72,7 @@ class Manager {
   }
 
   actionGame (gameSlug, auth, action) {
-    const game = this.currentGames.find(g => g.slug === gameSlug)
+    const game = this._getGame(gameSlug)
 
     if (!game) {
       return
@@ -76,16 +82,35 @@ class Manager {
       return
     }
 
-    // TODO: check if action is allowed
+    // TODO: Convert allowedMoves into array of string (actions), then check if action is allowed
+    // if (!game.allowedMoves || !game.allowedMoves.includes(action)) {
+    //   return
+    // }
+
     game._executeAction(action)
 
     this.sendGameStatus(gameSlug)
+
+    if (game.isEnd) {
+      this.currentGames = this.currentGames.filter(slug => slug !== game.slug)
+      this.lastGames.unshift(game.slug)
+
+      // TODO: save game in a file
+
+      this.updateGamesList()
+    }
   }
 
   watchGame (gameSlug, auth, sendEvent = true) {
-    const game = this.currentGames.find(g => g.slug === gameSlug)
+    let game = this._getGame(gameSlug)
 
     if (!game) {
+      // TODO: Check if game is saved in a file?
+    }
+
+    if (!game) {
+      this.send({ auth: [auth] }, 'game-not-found', { gameSlug })
+      console.warn('[Watch-Game] Not found:', gameSlug)
       return
     }
 
@@ -99,7 +124,7 @@ class Manager {
   }
 
   sendGameStatus (gameSlug, auth = null) {
-    const game = this.currentGames.find(g => g.slug === gameSlug)
+    const game = this._getGame(gameSlug)
 
     if (!game) {
       return
@@ -110,7 +135,7 @@ class Manager {
       if (!auth || auth === watchAuth) {
         const data = { gameSlug, state: { ...state } }
         if (game.currentPlayer.auth !== watchAuth) {
-          data.allowedMoves = null
+          data.state.allowedMoves = null
         }
         this.send({ auth: [watchAuth] }, 'game-state', data)
       }
@@ -119,8 +144,8 @@ class Manager {
 
   updateGamesList (onlyForThisClient = null) {
     const data = {
-      current: this.currentGames.map(game => game.summary()),
-      last: this.lastGames.map(game => game.summary())
+      current: this.currentGames.map(slug => this._getGame(slug)).filter(g => g).map(game => game.summary()),
+      last: this.lastGames.map(slug => this._getGame(slug)).filter(g => g).map(game => game.summary())
     }
     this.send(onlyForThisClient ? { instances: [onlyForThisClient] } : {}, 'games', data)
   }

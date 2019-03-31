@@ -14,6 +14,7 @@ class Game {
     this._temporaryWall = null
     this._allowedMoves = null
 
+    this.currentPlayerID = 1
     // this.setHistory(this.history.length - 1)
   }
 
@@ -58,6 +59,10 @@ class Game {
   }
 
   get allowedMoves () {
+    if (this.isEnd) {
+      return null
+    }
+
     return this._allowedMoves || null
   }
 
@@ -71,8 +76,13 @@ class Game {
         bestPath: this.player2.bestPath
       },
       currentPlayerID: this.currentPlayerID,
-      allowedMoves: this.allowedMoves
+      allowedMoves: this.allowedMoves,
+      isEnd: this.isEnd
     }
+  }
+
+  get isEnd () {
+    return !this.player1.bestPath.length || !this.player2.bestPath.length
   }
 
   updateState (state) {

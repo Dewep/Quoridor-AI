@@ -141,7 +141,7 @@ module.exports = {
               classes.push('wall-player-1')
             } else if ((x > 0 && this.game.player2.walls.includes(wallPosition)) || (x < 8 && this.game.player2.walls.includes(wallPosition + 1))) {
               classes.push('wall-player-2')
-            } else if (x < 8 && this.game.allowedMoves.walls.includes(wallPosition + 1)) {
+            } else if (this.game.allowedMoves && x < 8 && this.game.allowedMoves.walls.includes(wallPosition + 1)) {
               classes.push('wall-place')
             }
             const click = () => {
@@ -164,7 +164,7 @@ module.exports = {
               classes.push('wall-player-1')
             } else if (this.game.player2.walls.includes(64 + wallPosition) || (y > 0 && this.game.player2.walls.includes(64 + wallPosition - 8))) {
               classes.push('wall-player-2')
-            } else if (this.game.allowedMoves.walls.includes(64 + wallPosition)) {
+            } else if (this.game.allowedMoves && this.game.allowedMoves.walls.includes(64 + wallPosition)) {
               classes.push('wall-place')
             }
             const click = () => {
@@ -180,7 +180,7 @@ module.exports = {
             classes.push('player-1')
           } else if (this.game.player2.row === y && this.game.player2.col === x) {
             classes.push('player-2')
-          } else if (this.game.allowedMoves.cases.some(c => c.row === y && c.col === x)) {
+          } else if (this.game.allowedMoves && this.game.allowedMoves.cases.some(c => c.row === y && c.col === x)) {
             classes.push('case-move')
           }
           if (this.game.player1.bestPath.some(c => c.row === y && c.col === x)) {

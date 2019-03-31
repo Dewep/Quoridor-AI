@@ -7,7 +7,9 @@ module.exports = store => {
   let authToken = window.localStorage.authToken || null
 
   function eventHandler (type, data) {
-    if (type === 'game-watch') {
+    if (type === 'game-not-found') {
+      router.push({ name: 'home' })
+    } else if (type === 'game-watch') {
       store.commit('WS_EVENT', { type, data })
       router.push({ name: 'game', params: { gameSlug: data.gameSlug } })
     } else {

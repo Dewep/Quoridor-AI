@@ -28,7 +28,7 @@ module.exports = store => {
   function connect () {
     store.dispatch('setAuth', { loading: true, connected: false })
 
-    socket = new WebSocket('ws://127.0.0.1:8061')
+    socket = new WebSocket('ws' + (document.location.protocol === 'http:' ? '' : 's') + '://' + document.location.host)
 
     socket.addEventListener('open', function (event) {
       send('auth', { auth: authToken })

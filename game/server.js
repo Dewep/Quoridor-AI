@@ -73,6 +73,13 @@ class GameServer extends Game {
     return false
   }
 
+  _isOpponentOnCase (rowTo, colTo) {
+    if (this.opponentPlayer.row === rowTo && this.opponentPlayer.col === colTo) {
+      return true
+    }
+    return false
+  }
+
   get allowedMoves () {
     if (!this._allowedMoves) {
       const cases = [
@@ -86,6 +93,10 @@ class GameServer extends Game {
         }
         // Can't cross walls
         if (this._isMoveCrossingWall(this.currentPlayer.row, this.currentPlayer.col, c.row, c.col)) {
+          return false
+        }
+        // Can't be on same position as opponent
+        if (this._isOpponentOnCase(c.row, c.col)) {
           return false
         }
         return true

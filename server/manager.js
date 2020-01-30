@@ -31,6 +31,7 @@ class Manager {
     } else if (type === 'online') {
       if (this._waitingRequestAuth) {
         this.newGame({ auth: this._waitingRequestAuth, name: '🧑' }, { auth, name: '🧑' })
+        this._waitingRequestAuth = null
       } else {
         this._waitingRequestAuth = auth
       }

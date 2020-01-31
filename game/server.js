@@ -155,7 +155,7 @@ class GameServer extends Game {
           return false
         }
         // Can't cross other walls
-        if (this._isWallAt(w + 64) || this._isWallAt(w - 64) || (w < 63 && this._isWallAt(w + 1)) || (w > 63 && this._isWallAt(w + 8))) {
+        if (this._isWallAt(w + 64) || this._isWallAt(w - 64) || (w < 63 && w % 8 !== 7 && this._isWallAt(w + 1)) || (w > 63 && this._isWallAt(w + 8))) {
           return false
         }
         // Can't block player to win

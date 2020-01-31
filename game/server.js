@@ -73,14 +73,23 @@ class GameServer extends Game {
     return false
   }
 
+  _isOpponentOnCase (rowTo, colTo) {
+    if (this.opponentPlayer.row === rowTo && this.opponentPlayer.col === colTo) {
+      return true
+    }
+    return false
+  }
+
   get allowedMoves () {
     if (!this._allowedMoves) {
-      const cases = [
+      const adjacentCases = [
         { row: this.currentPlayer.row - 1, col: this.currentPlayer.col },
         { row: this.currentPlayer.row + 1, col: this.currentPlayer.col },
         { row: this.currentPlayer.row, col: this.currentPlayer.col - 1 },
         { row: this.currentPlayer.row, col: this.currentPlayer.col + 1 }
-      ].filter(c => {
+      ]
+
+      const cases = adjacentCases.filter(c => {
         if (c.row < 0 || c.row > 8 || c.col < 0 || c.col > 8) {
           return false
         }
@@ -88,8 +97,41 @@ class GameServer extends Game {
         if (this._isMoveCrossingWall(this.currentPlayer.row, this.currentPlayer.col, c.row, c.col)) {
           return false
         }
+        // Can't be on same position as opponent
+        if (this._isOpponentOnCase(c.row, c.col)) {
+          return false
+        }
         return true
       })
+
+      const occupiedCases = adjacentCases.filter(c => {
+        return this._isOpponentOnCase(c.row, c.col)
+      })
+      let adjacentToOpponentCases = []
+      for (const c of occupiedCases) {
+        adjacentToOpponentCases.push({ opponent: c, row: c.row - 1, col: c.col })
+        adjacentToOpponentCases.push({ opponent: c, row: c.row + 1, col: c.col })
+        adjacentToOpponentCases.push({ opponent: c, row: c.row, col: c.col - 1 })
+        adjacentToOpponentCases.push({ opponent: c, row: c.row, col: c.col + 1 })
+      }
+      const afterJumpCases = adjacentToOpponentCases.filter(c => {
+        if (c.row < 0 || c.row > 8 || c.col < 0 || c.col > 8) {
+          return false
+        }
+        // Can't cross walls
+        if (this._isMoveCrossingWall(c.opponent.row, c.opponent.col, c.row, c.col)) {
+          return false
+        }
+        // Don't go back to original case
+        if (this.currentPlayer.row === c.row && this.currentPlayer.col === c.col) {
+          return false
+        }
+        return true
+      })
+      for (const c of afterJumpCases) {
+        cases.push({ row: c.row, col: c.col })
+      }
+
       const walls = !this.currentPlayer.remainingWalls ? [] : Array.from(Array(128).keys()).filter(w => {
         // Wall already placed at this position
         if (this._isWallAt(w)) {

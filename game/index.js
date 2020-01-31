@@ -22,8 +22,16 @@ class Game {
     return id === 1 ? this.player1 : this.player2
   }
 
+  getOtherPlayer (id = 1) {
+    return id === 1 ? this.player2 : this.player1
+  }
+
   get currentPlayer () {
     return this.getPlayer(this.currentPlayerID)
+  }
+
+  get opponentPlayer () {
+    return this.getOtherPlayer(this.currentPlayerID)
   }
 
   reset () {

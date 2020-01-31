@@ -21,6 +21,10 @@ class PlayerServer extends Player {
     if (this.game._isMoveCrossingWall(currentRow, currentCol, nextRow, nextCol)) {
       return false
     }
+    // Check not a opponent on destination case
+    if (nextRow === this.opponent.row && nextCol === this.opponent.col) {
+      return false
+    }
     // Not a position already in the current solutions
     return !solutions.some(solution => solution.path.some(({ row, col }) => (row === nextRow && col === nextCol)))
   }

@@ -73,64 +73,81 @@ class GameServer extends Game {
     return false
   }
 
-  _isOpponentOnCase (rowTo, colTo) {
-    if (this.opponentPlayer.row === rowTo && this.opponentPlayer.col === colTo) {
+  _getPossibleMoves (playerID = null, row = null, col = null) {
+    playerID = playerID || this.currentPlayerID
+    const current = this.getPlayer(playerID)
+    const opponent = this.getOtherPlayer(playerID)
+
+    // If no override (in case of simulation to find the best path), get the real positions
+    row = row === null ? this.getPlayer(playerID).row : row
+    col = col === null ? this.getPlayer(playerID).col : col
+
+    let jumpOpponent = false
+
+    // Start with the basic moves
+    const cases = [
+      { row: row - 1, col: col },
+      { row: row + 1, col: col },
+      { row: row, col: col - 1 },
+      { row: row, col: col + 1 }
+    ].filter(c => {
+      // Sides of the board
+      if (c.row < 0 || c.row > 8 || c.col < 0 || c.col > 8) {
+        return false
+      }
+      // Can't cross walls
+      if (this._isMoveCrossingWall(row, col, c.row, c.col)) {
+        return false
+      }
+      // Can't go the current position (in case of override positions)
+      if (current.row === c.row && current.col === c.col) {
+        return false
+      }
+      // Can't be on same position as opponent
+      if (opponent.row === c.row && opponent.col === c.col) {
+        jumpOpponent = true
+        return false
+      }
       return true
+    })
+
+    // We can jump the opponent
+    if (jumpOpponent) {
+      const jumpCases = [
+        { row: opponent.row - 1, col: opponent.col },
+        { row: opponent.row + 1, col: opponent.col },
+        { row: opponent.row, col: opponent.col - 1 },
+        { row: opponent.row, col: opponent.col + 1 }
+      ].filter(c => {
+        // Sides of the board
+        if (c.row < 0 || c.row > 8 || c.col < 0 || c.col > 8) {
+          return false
+        }
+        // Can't cross walls
+        if (this._isMoveCrossingWall(opponent.row, opponent.col, c.row, c.col)) {
+          return false
+        }
+        // Don't go back to original case
+        if (row === c.row && col === c.col) {
+          return false
+        }
+        // Can't go the current position (in case of override positions)
+        if (current.row === c.row && current.col === c.col) {
+          return false
+        }
+        return true
+      })
+
+      // We add the jump cases to the possible moves
+      cases.push(...jumpCases)
     }
-    return false
+
+    return cases
   }
 
   get allowedMoves () {
     if (!this._allowedMoves) {
-      const adjacentCases = [
-        { row: this.currentPlayer.row - 1, col: this.currentPlayer.col },
-        { row: this.currentPlayer.row + 1, col: this.currentPlayer.col },
-        { row: this.currentPlayer.row, col: this.currentPlayer.col - 1 },
-        { row: this.currentPlayer.row, col: this.currentPlayer.col + 1 }
-      ]
-
-      const cases = adjacentCases.filter(c => {
-        if (c.row < 0 || c.row > 8 || c.col < 0 || c.col > 8) {
-          return false
-        }
-        // Can't cross walls
-        if (this._isMoveCrossingWall(this.currentPlayer.row, this.currentPlayer.col, c.row, c.col)) {
-          return false
-        }
-        // Can't be on same position as opponent
-        if (this._isOpponentOnCase(c.row, c.col)) {
-          return false
-        }
-        return true
-      })
-
-      const occupiedCases = adjacentCases.filter(c => {
-        return this._isOpponentOnCase(c.row, c.col)
-      })
-      let adjacentToOpponentCases = []
-      for (const c of occupiedCases) {
-        adjacentToOpponentCases.push({ opponent: c, row: c.row - 1, col: c.col })
-        adjacentToOpponentCases.push({ opponent: c, row: c.row + 1, col: c.col })
-        adjacentToOpponentCases.push({ opponent: c, row: c.row, col: c.col - 1 })
-        adjacentToOpponentCases.push({ opponent: c, row: c.row, col: c.col + 1 })
-      }
-      const afterJumpCases = adjacentToOpponentCases.filter(c => {
-        if (c.row < 0 || c.row > 8 || c.col < 0 || c.col > 8) {
-          return false
-        }
-        // Can't cross walls
-        if (this._isMoveCrossingWall(c.opponent.row, c.opponent.col, c.row, c.col)) {
-          return false
-        }
-        // Don't go back to original case
-        if (this.currentPlayer.row === c.row && this.currentPlayer.col === c.col) {
-          return false
-        }
-        return true
-      })
-      for (const c of afterJumpCases) {
-        cases.push({ row: c.row, col: c.col })
-      }
+      const cases = this._getPossibleMoves()
 
       const walls = !this.currentPlayer.remainingWalls ? [] : Array.from(Array(128).keys()).filter(w => {
         // Wall already placed at this position

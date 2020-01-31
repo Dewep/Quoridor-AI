@@ -14,9 +14,29 @@ app.use(express.static('dist'))
 
 const manager = new Manager()
 
-wss.on('connection', function connection (ws) {
-  return new Client(manager, ws)
+function noop () {}
+
+function heartbeat () {
+  this.isAlive = true
+}
+
+wss.on('connection', function connection (client) {
+  client.isAlive = true
+  client.on('pong', heartbeat)
+
+  return new Client(manager, client)
 })
+
+setInterval(function ping() {
+  for (const client of wss.clients) {
+    if (client.isAlive === false) {
+      client.terminate()
+    } else {
+      client.isAlive = false
+      client.ping(noop)
+    }
+  }
+}, 30000)
 
 function indexFallback (req, res) {
   res.sendFile(path.resolve(__dirname, '..', 'dist', 'index.html'))

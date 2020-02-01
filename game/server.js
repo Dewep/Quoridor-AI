@@ -147,7 +147,7 @@ class GameServer extends Game {
 
   get allowedMoves () {
     if (!this._allowedMoves) {
-      const cases = this._getPossibleMoves()
+      const tiles = this._getPossibleMoves()
 
       const walls = !this.currentPlayer.remainingWalls ? [] : Array.from(Array(128).keys()).filter(w => {
         // Wall already placed at this position
@@ -168,7 +168,7 @@ class GameServer extends Game {
 
         return true
       })
-      this._allowedMoves = { cases, walls }
+      this._allowedMoves = { tiles, walls }
     }
     return this._allowedMoves
   }

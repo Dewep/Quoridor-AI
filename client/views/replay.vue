@@ -23,7 +23,7 @@
             <section class="player player-1" :class="{ current: currentPlayerID === 1 }">
               <h5>Player 1</h5>
               <small>Remaining walls: {{ game.player1.remainingWalls }}</small><br>
-              <small>Cases to the victory: {{ game.player1.bestPath ? game.player1.bestPath.length : 'N/A' }}</small><br>
+              <small>Tiles to the victory: {{ game.player1.bestPath ? game.player1.bestPath.length : 'N/A' }}</small><br>
               <small>Evaluation score: {{ game.player1.score || 'N/A' }}</small>
             </section>
           </div>
@@ -31,7 +31,7 @@
             <section class="player player-2" :class="{ current: currentPlayerID === 2 }">
               <h5>Player 2</h5>
               <small>Remaining walls: {{ game.player2.remainingWalls }}</small><br>
-              <small>Cases to the victory: {{ game.player2.bestPath ? game.player2.bestPath.length : 'N/A' }}</small><br>
+              <small>Tiles to the victory: {{ game.player2.bestPath ? game.player2.bestPath.length : 'N/A' }}</small><br>
               <small>Evaluation score: {{ game.player2.score || 'N/A' }}</small>
             </section>
           </div>
@@ -175,13 +175,13 @@ module.exports = {
             cols.push({ classes, click })
           }
 
-          const classes = ['case']
+          const classes = ['tile']
           if (this.game.player1.row === y && this.game.player1.col === x) {
             classes.push('player-1')
           } else if (this.game.player2.row === y && this.game.player2.col === x) {
             classes.push('player-2')
-          } else if (this.game.allowedMoves && this.game.allowedMoves.cases.some(c => c.row === y && c.col === x)) {
-            classes.push('case-move')
+          } else if (this.game.allowedMoves && this.game.allowedMoves.tiles.some(c => c.row === y && c.col === x)) {
+            classes.push('tile-move')
           }
           if (this.game.player1.bestPath.some(c => c.row === y && c.col === x)) {
             classes.push('path-player-1')
@@ -189,10 +189,10 @@ module.exports = {
           if (this.game.player2.bestPath.some(c => c.row === y && c.col === x)) {
             classes.push('path-player-2')
           }
-          const click = ((caseY, caseX) => {
+          const click = ((tileY, tileX) => {
             return () => {
-              if (classes.includes('case-move')) {
-                this.game.movePlayer({ row: caseY, col: caseX })
+              if (classes.includes('tile-move')) {
+                this.game.movePlayer({ row: tileY, col: tileX })
               }
             }
           })(y, x)
@@ -255,7 +255,7 @@ module.exports = {
   .row {
     clear: both;
   }
-  .case {
+  .tile {
     padding-top: 9%;
     width: 9%;
     float: left;
@@ -342,7 +342,7 @@ module.exports = {
   .path-player-2 .cross-2 {
     background: $player-two-color;
   }
-  .case {
+  .tile {
     background: #FFF;
     position: relative;
   }
@@ -375,7 +375,7 @@ module.exports = {
   //     left: 75%;
   //   }
   // }
-  .case-move:hover {
+  .tile-move:hover {
     background: #CCC;
     cursor: pointer;
   }

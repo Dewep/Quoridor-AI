@@ -73,6 +73,22 @@ class GameServer extends Game {
     return false
   }
 
+  _isPossibleMove (fromRow, fromCol, toRow, toCol, player) {
+    // Sides of the board
+    if (toRow < 0 || toRow > 8 || toCol < 0 || toCol > 8) {
+      return false
+    }
+    // Can't cross walls
+    if (this._isMoveCrossingWall(fromRow, fromCol, toRow, toCol)) {
+      return false
+    }
+    // Can't go the current player position (in case of override positions)
+    if (player.row === toRow && player.col === toCol) {
+      return false
+    }
+    return true
+  }
+
   _getPossibleMoves (playerID = null, row = null, col = null) {
     playerID = playerID || this.currentPlayerID
     const current = this.getPlayer(playerID)
@@ -85,26 +101,18 @@ class GameServer extends Game {
     let jumpOpponent = false
 
     // Start with the basic moves
-    const cases = [
+    const tiles = [
       { row: row - 1, col: col },
       { row: row + 1, col: col },
       { row: row, col: col - 1 },
       { row: row, col: col + 1 }
-    ].filter(c => {
-      // Sides of the board
-      if (c.row < 0 || c.row > 8 || c.col < 0 || c.col > 8) {
-        return false
-      }
-      // Can't cross walls
-      if (this._isMoveCrossingWall(row, col, c.row, c.col)) {
-        return false
-      }
-      // Can't go the current position (in case of override positions)
-      if (current.row === c.row && current.col === c.col) {
+    ].filter(tile => {
+      // Sides, walls, initial position
+      if (!this._isPossibleMove(row, col, tile.row, tile.col, current)) {
         return false
       }
       // Can't be on same position as opponent
-      if (opponent.row === c.row && opponent.col === c.col) {
+      if (opponent.row === tile.row && opponent.col === tile.col) {
         jumpOpponent = true
         return false
       }
@@ -113,36 +121,28 @@ class GameServer extends Game {
 
     // We can jump the opponent
     if (jumpOpponent) {
-      const jumpCases = [
-        { row: opponent.row - 1, col: opponent.col },
-        { row: opponent.row + 1, col: opponent.col },
-        { row: opponent.row, col: opponent.col - 1 },
-        { row: opponent.row, col: opponent.col + 1 }
-      ].filter(c => {
-        // Sides of the board
-        if (c.row < 0 || c.row > 8 || c.col < 0 || c.col > 8) {
-          return false
-        }
-        // Can't cross walls
-        if (this._isMoveCrossingWall(opponent.row, opponent.col, c.row, c.col)) {
-          return false
-        }
-        // Don't go back to original case
-        if (row === c.row && col === c.col) {
-          return false
-        }
-        // Can't go the current position (in case of override positions)
-        if (current.row === c.row && current.col === c.col) {
-          return false
-        }
-        return true
-      })
+      const rowModification = opponent.row - row
+      const colModification = opponent.col - col
 
-      // We add the jump cases to the possible moves
-      cases.push(...jumpCases)
+      // Jump forward
+      const forwardJumpTiles = [
+        { row: row + rowModification * 2, col: col + colModification * 2 }
+      ].filter(tile => this._isPossibleMove(opponent.row, opponent.col, tile.row, tile.col, current))
+
+      if (forwardJumpTiles.length) {
+        tiles.push(...forwardJumpTiles)
+      } else {
+        // Jump on the sides
+        const sideJumpTiles = [
+          { row: opponent.row + colModification, col: opponent.col + rowModification },
+          { row: opponent.row - colModification, col: opponent.col - rowModification }
+        ].filter(tile => this._isPossibleMove(opponent.row, opponent.col, tile.row, tile.col, current))
+
+        tiles.push(...sideJumpTiles)
+      }
     }
 
-    return cases
+    return tiles
   }
 
   get allowedMoves () {

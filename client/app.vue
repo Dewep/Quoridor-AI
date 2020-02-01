@@ -71,7 +71,7 @@ module.exports = {
 @import "styles/main.scss";
 
 #nav {
-  width: 12rem;
+  width: 15rem;
   background: $sidebar-color;
 }
 

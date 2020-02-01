@@ -290,8 +290,8 @@ module.exports = {
   .general-info,
   .winner-info {
     position: absolute;
-    background: white;
-    bottom: 1%;
+    background: #dcc289;
+    bottom: 0;
     left: 20%;
     right: 20%;
     text-align: center;
@@ -299,6 +299,7 @@ module.exports = {
     font-weight: bold;
     border: 1px solid $sidebar-color;
     opacity: .95;
+    font-size: 70%;
   }
   .winner-info {
     display: none;
@@ -335,7 +336,7 @@ module.exports = {
       left: 0;
       bottom: 0;
       right: 0;
-      background: #CCC;
+      background: #71665e;
       cursor: pointer;
       z-index: 1;
     }
@@ -356,7 +357,7 @@ module.exports = {
     }
   }
   .wall {
-    background: #ecd8d8;
+    background: #dcc28977;
   }
   .player,
   .cross-1,
@@ -404,7 +405,7 @@ module.exports = {
     background: $player-two-color;
   }
   .tile {
-    background: #FFF;
+    background: #c5b49a;
     position: relative;
   }
   .player-1,
@@ -436,8 +437,11 @@ module.exports = {
   //     left: 75%;
   //   }
   // }
-  .case-move:hover {
-    background: #CCC;
+  .tile-move {
+    background: #95aba855;
+  }
+  .tile-move:hover {
+    background: #71665e;
     cursor: pointer;
   }
 }
